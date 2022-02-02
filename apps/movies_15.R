@@ -87,7 +87,11 @@ ui <- fluidPage(
       
       # Write sampled data as csv ------------------------------------------
       actionButton(inputId = "write_csv", 
-                   label = "Write CSV")
+                   label = "Write CSV"),
+      
+      # Get a new sample ------------------------------------------------------
+      actionButton(inputId = "get_new_sample", 
+                   label = "Get new sample"), 
       
     ),
     
@@ -125,12 +129,15 @@ server <- function(input, output, session) {
                        max = nrow(movies_subset())
     )
   })
-  
-  # Create new df that is n_samp obs from selected type movies ------
-  movies_sample <- reactive({ 
-    req(input$n_samp) # ensure availablity of value before proceeding
-    sample_n(movies_subset(), input$n_samp)
-  })
+
+  # Get new sample --------------------------------------------------
+  movies_sample <- eventReactive(eventExpr = input$get_new_sample,
+                                 valueExpr = { 
+                                   req(input$n_samp)
+                                   sample_n(movies_subset(), input$n_samp) 
+                                 },
+                                 ignoreNULL = FALSE
+  )
   
   # Convert plot_title toTitleCase ----------------------------------
   pretty_plot_title <- reactive({ toTitleCase(input$plot_title) })
